@@ -1,5 +1,3 @@
-CREATE DATABASE metabase;
-
 CREATE TABLE IF NOT EXISTS tag (
   id INTEGER NOT NULL,
   name TEXT NOT NULL,
@@ -187,18 +185,19 @@ CREATE TABLE IF NOT EXISTS conversation (
   subject TEXT NULL,
   body TEXT NOT NULL,
   author_user TEXT NULL,
+  author_lead TEXT NULL,
   author_admin INTEGER NULL,
   "user" TEXT NULL,
   "lead" TEXT NULL,
   assignee INTEGER NULL,
   open BOOLEAN NOT NULL DEFAULT TRUE,
   read BOOLEAN NOT NULL DEFAULT FALSE,
-  conversation_parts JSONB NULL,
   tags JSONB NULL,
   CONSTRAINT pk_conversation PRIMARY KEY (id),
   CONSTRAINT fk_conversation_assignee_admin_id FOREIGN KEY(assignee) REFERENCES admin(id) ON DELETE CASCADE,
   CONSTRAINT fk_conversation_author_admin_id FOREIGN KEY(author_admin) REFERENCES admin(id) ON DELETE CASCADE,
   CONSTRAINT fk_conversation_author_user_id FOREIGN KEY(author_user) REFERENCES "user"(id) ON DELETE CASCADE,
+  CONSTRAINT fk_conversation_author_lead_id FOREIGN KEY(author_lead) REFERENCES lead(id) ON DELETE CASCADE,
   CONSTRAINT fk_conversation_user_id FOREIGN KEY("user") REFERENCES "user"(id) ON DELETE CASCADE,
   CONSTRAINT fk_conversation_lead_id FOREIGN KEY(lead) REFERENCES lead(id) ON DELETE CASCADE
 );
@@ -210,6 +209,82 @@ CREATE TABLE IF NOT EXISTS "event" (
   id TEXT NULL,
   email TEXT NULL,
   metadata JSONB NULL,
-  CONSTRAINT pk_event PRIMARY KEY (event_name, created_at),
+  CONSTRAINT pk_event PRIMARY KEY (event_name, created_at, user_id),
   CONSTRAINT fk_event_user_id FOREIGN KEY(user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
+
+CREATE view outdated_user AS
+  WITH user_event(user_id, created_at) AS (
+    SELECT user_id, MAX(created_at) AS created_at
+    FROM "event"
+    GROUP BY user_id
+  )
+  SELECT "user".id, "user".last_request_at
+  FROM "user"
+  LEFT JOIN user_event ON user_event.user_id = "user".id
+  WHERE user_event.created_at IS NULL
+  OR "user".last_request_at >= user_event.created_at;
+
+CREATE TABLE IF NOT EXISTS conversation_part (
+  id TEXT NOT NULL,
+  conversation_id TEXT NOT NULL,
+  part_type TEXT NOT NULL,
+  body TEXT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  notified_at INTEGER NOT NULL,
+  assigned_to INTEGER NULL,
+  author_user TEXT NULL,
+  author_admin INTEGER NULL,
+  CONSTRAINT pk_conversation_part PRIMARY KEY (id),
+  CONSTRAINT fk_conversation_part_conversation_id FOREIGN KEY(conversation_id) REFERENCES conversation(id) ON DELETE CASCADE,
+  CONSTRAINT fk_conversation_part_assignee_admin_id FOREIGN KEY(assigned_to) REFERENCES admin(id) ON DELETE CASCADE,
+  CONSTRAINT fk_conversation_part_author_admin_id FOREIGN KEY(author_admin) REFERENCES admin(id) ON DELETE CASCADE,
+  CONSTRAINT fk_conversation_part_author_user_id FOREIGN KEY(author_user) REFERENCES "user"(id) ON DELETE CASCADE
+);
+
+CREATE MATERIALIZED VIEW conversation_response_time(conversation_id, time) AS
+  WITH conversation_part_date AS (
+      SELECT
+        conversation_id,
+        MIN(created_at) AS created_at
+      FROM conversation_part
+      WHERE part_type = 'comment'
+      AND author_admin IS NOT NULL
+      GROUP BY conversation_id
+  )
+  SELECT
+    conversation.id,
+    conversation_part_date.created_at - conversation.created_at
+  FROM conversation_part_date
+  JOIN conversation ON conversation.id=conversation_part_date.conversation_id
+  WHERE conversation.author_user IS NOT NULL;
+
+CREATE UNIQUE INDEX pk_conversation_response_time ON conversation_response_time(conversation_id);
+
+CREATE MATERIALIZED VIEW conversation_part_response_time(conversation_part_id, time) AS
+  WITH conversation_part_time AS (
+      SELECT
+        id,
+        created_at - lag(created_at) OVER(
+          PARTITION BY conversation_id
+          ORDER BY conversation_id, created_at ASC
+          ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+        ) as response_time,
+        lag(author_user) OVER(
+          PARTITION BY conversation_id
+          ORDER BY conversation_id, created_at ASC
+          ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+        ) AS prev_user
+      FROM conversation_part
+  )
+  SELECT
+    conversation_part.id,
+    conversation_part_time.response_time
+  FROM conversation_part_time
+  JOIN conversation_part ON conversation_part.id=conversation_part_time.id
+  WHERE conversation_part.author_admin IS NOT NULL
+  AND conversation_part_time.response_time IS NOT NULL
+  AND conversation_part_time.prev_user IS NOT NULL;
+
+CREATE UNIQUE INDEX pk_conversation_part_response_time ON conversation_part_response_time(conversation_part_id);
