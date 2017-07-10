@@ -288,3 +288,23 @@ CREATE MATERIALIZED VIEW conversation_part_response_time(conversation_part_id, t
   AND conversation_part_time.prev_user IS NOT NULL;
 
 CREATE UNIQUE INDEX pk_conversation_part_response_time ON conversation_part_response_time(conversation_part_id);
+
+CREATE OR REPLACE FUNCTION _median(NUMERIC[]) RETURNS NUMERIC AS
+$$
+SELECT AVG(val)
+FROM (
+  SELECT val
+  FROM unnest($1) val
+  ORDER BY 1
+  LIMIT  2 - MOD(array_upper($1, 1), 2)
+  OFFSET CEIL(array_upper($1, 1) / 2.0) - 1
+) sub;
+$$
+LANGUAGE 'sql' IMMUTABLE;
+
+CREATE AGGREGATE median(NUMERIC) (
+  SFUNC=array_append,
+  STYPE=NUMERIC[],
+  FINALFUNC=_median,
+  INITCOND='{}'
+);

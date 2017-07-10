@@ -1,9 +1,9 @@
-intercom2db:
+intercom2dw:
     image: node:8.1
     environment:
-        POSTGRES_USER: intercom2db
-        POSTGRES_PASSWORD: intercom2db
-        POSTGRES_DB: intercom2db
+        POSTGRES_USER: intercom2dw
+        POSTGRES_PASSWORD: intercom2dw
+        POSTGRES_DB: intercom2dw
     links:
         - db:db
     volumes:
@@ -17,9 +17,9 @@ db:
     ports:
         - 5432:5432
     environment:
-        POSTGRES_USER: intercom2db
-        POSTGRES_PASSWORD: intercom2db
-        POSTGRES_DB: intercom2db
+        POSTGRES_USER: intercom2dw
+        POSTGRES_PASSWORD: intercom2dw
+        POSTGRES_DB: intercom2dw
 
 metabase:
     image: metabase/metabase
@@ -27,12 +27,10 @@ metabase:
         - db:db
     ports:
         - 3000:3000
-    #volumes:
-    #    - ./data/metabase:/metabase-data
     environment:
         MB_DB_TYPE: postgres
         MB_DB_DBNAME: metabase
         MB_DB_PORT: 5432
-        MB_DB_USER: intercom2db
-        MB_DB_PASS: intercom2db
+        MB_DB_USER: intercom2dw
+        MB_DB_PASS: intercom2dw
         MB_DB_HOST: db

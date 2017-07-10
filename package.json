@@ -1,5 +1,5 @@
 {
-  "name": "intercom2db",
+  "name": "intercom2dw",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -8,6 +8,7 @@
     "node-fetch": "^1.7.1",
     "pg": "^6.3.1",
     "pg-native": "^1.10.1",
+    "pkg": "^4.1.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {
