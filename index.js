@@ -59,6 +59,28 @@ caporal
             blacklist |= consts.IGNORE_USERS;
         }
 
+        const timer = logger.startTimer();
+        const profile = () => {
+            timer.done('Time');
+            logger.log('info', `Requests`, { requests: api.requests });
+        };
+        const finish = () => {
+            db.disconnect();
+
+            profile();
+        };
+
+        process.on('SIGINT', () => {
+            process.stdout.write('\r');
+            logger.log('warn', 'Caught SIGINT');
+
+            finish();
+
+            process.exit();
+        });
+
+        process.on('SIGUSR2', profile);
+
         db.connect()
             .then(() => !(blacklist & consts.TAGS) && api.tags()
                 .onBounce(tags => logger.log('info', `Got ${tags.length} tags`))
@@ -136,11 +158,11 @@ caporal
                 .then(() => db.query('REFRESH MATERIALIZED VIEW CONCURRENTLY conversation_part_response_time'))
                 .then(() => logger.log('info', 'Done loading conversation parts')),
             )
-            .then(() => db.disconnect())
+            .then(finish)
             .catch((err) => {
                 logger.log('error', err);
 
-                db.disconnect();
+                finish();
             });
     });
 
