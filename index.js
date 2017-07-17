@@ -14,12 +14,12 @@ caporal
 caporal
     .argument('[app-id]', 'Application ID', null, process.env.INTERCOM2DW_APP_ID)
     .argument('[app-token]', 'Application token', null, process.env.INTERCOM2DW_APP_TOKEN)
-    .option('--intercom-api-url', 'Intercom API URL', null, process.env.INTERCOM2DW_API_URL || 'https://api.intercom.io')
-    .option('--db-host', 'Postgres database host', null, process.env.INTERCOM2DW_DB_HOST || 'db')
-    .option('--db-port', 'Postgres database port', caporal.INT, process.env.INTERCOM2DW_DB_HOST || 5432)
-    .option('--db-user', 'Postgres database username', null, process.env.INTERCOM2DW_DB_USER || 'intercom2dw')
-    .option('--db-password', 'Postgres database password', null, process.env.INTERCOM2DW_DB_PASSWORD || 'intercom2dw')
-    .option('--db-name', 'Postgres database name', null, process.env.INTERCOM2DW_DB_NAME || 'intercom2dw')
+    .option('--intercom-api-url', 'Intercom API URL', null, process.env.INTERCOM2DW_API_URL || consts.API_URL)
+    .option('--db-host', 'Postgres database host', null, process.env.INTERCOM2DW_DB_HOST || consts.DB_HOST)
+    .option('--db-port', 'Postgres database port', caporal.INT, process.env.INTERCOM2DW_DB_HOST || consts.DB_PORT)
+    .option('--db-user', 'Postgres database username', null, process.env.INTERCOM2DW_DB_USER || consts.DB_USER)
+    .option('--db-password', 'Postgres database password', null, process.env.INTERCOM2DW_DB_PASSWORD || consts.DB_PASS)
+    .option('--db-name', 'Postgres database name', null, process.env.INTERCOM2DW_DB_NAME || consts.DB_NAME)
     .option('--no-tags', 'Do not load tags (implies --no-users and --no-companies)')
     .option('--no-segments', 'Do not load segments (implies --no-users and --no-companies)')
     .option('--no-admins', 'Do not load admins (implies --no-conversations and --no-conversation-parts)')
@@ -59,10 +59,14 @@ caporal
             blacklist |= consts.IGNORE_USERS;
         }
 
+        if (options.noEvents) {
+            blacklist |= consts.IGNORE_EVENTS;
+        }
+
         const timer = logger.startTimer();
         const profile = () => {
             timer.done('Time');
-            logger.log('info', `Requests`, { requests: api.requests });
+            logger.log('info', 'Requests', { requests: api.requests });
         };
         const finish = () => {
             db.disconnect();
@@ -84,43 +88,43 @@ caporal
         db.connect()
             .then(() => !(blacklist & consts.TAGS) && api.tags()
                 .onBounce(tags => logger.log('info', `Got ${tags.length} tags`))
-                .onBounce(tags => db.tags(tags))
+                .onBounce(tags => db.saveTags(tags))
                 .jump()
                 .then(() => logger.log('info', 'Done loading tags')),
             )
             .then(() => !(blacklist & consts.SEGMENTS) && api.segments()
                 .onBounce(segments => logger.log('info', `Got ${segments.length} segments`))
-                .onBounce(segments => db.segments(segments))
+                .onBounce(segments => db.saveSegments(segments))
                 .jump()
                 .then(() => logger.log('info', 'Done loading segments')),
             )
             .then(() => !(blacklist & consts.ADMINS) && api.admins()
                 .onBounce(admins => logger.log('info', `Got ${admins.length} admins`))
-                .onBounce(admins => db.admins(admins))
+                .onBounce(admins => db.saveAdmins(admins))
                 .jump()
                 .then(() => logger.log('info', 'Done loading admins')),
             )
             .then(() => !(blacklist & consts.COMPANIES) && api.companies()
                 .onBounce(companies => logger.log('info', `Got ${companies.length} companies`))
-                .onBounce(companies => db.companies(companies))
+                .onBounce(companies => db.saveCompanies(companies))
                 .jump()
                 .then(() => logger.log('info', 'Done loading companies')),
             )
             .then(() => !(blacklist & consts.LEADS) && api.leads()
                 .onBounce(leads => logger.log('info', `Got ${leads.length} leads`))
-                .onBounce(leads => db.leads(leads))
+                .onBounce(leads => db.saveLeads(leads))
                 .jump()
-                .then(() => db.query('REFRESH MATERIALIZED VIEW CONCURRENTLY lead_tag'))
+                .then(() => db.refreshLeadTags())
                 .then(() => logger.log('info', 'Done loading leads')),
             )
             .then(() => !(blacklist & consts.USERS) && api.users()
                 .onBounce(users => logger.log('info', `Got ${users.length} users`))
-                .onBounce(users => db.users(users))
+                .onBounce(users => db.saveUsers(users))
                 .jump()
-                .then(() => db.query('REFRESH MATERIALIZED VIEW CONCURRENTLY user_tag'))
+                .then(() => db.refreshUserTags())
                 .then(() => logger.log('info', 'Done loading users')),
             )
-            .then(() => !(blacklist & consts.EVENTS) && db.query('SELECT * FROM outdated_user ORDER BY last_request_at DESC')
+            .then(() => !(blacklist & consts.EVENTS) && db.fetchOutdatedUsers()
                 .then(async (results) => {
                     let i = 0;
 
@@ -129,7 +133,7 @@ caporal
 
                         await api.events(user.id)
                             .onBounce(events => logger.log('info', `Got ${events.length} events`))
-                            .onBounce(events => db.events(user, events))
+                            .onBounce(events => db.saveEvents(user, events))
                             .jump();
                     }
                 })
@@ -137,12 +141,12 @@ caporal
             )
             .then(() => !(blacklist & consts.CONVERSATIONS) && api.conversations()
                 .onBounce(conversations => logger.log('info', `Got ${conversations.length} conversations`))
-                .onBounce(conversations => db.conversations(conversations))
+                .onBounce(conversations => db.saveConversations(conversations))
                 .jump()
-                .then(() => db.query('REFRESH MATERIALIZED VIEW CONCURRENTLY conversation_response_time'))
+                .then(() => db.refreshConversationResponseTimes())
                 .then(() => logger.log('info', 'Done loading conversations')),
             )
-            .then(() => !(blacklist & consts.PARTS) && db.query('SELECT * FROM conversation ORDER BY updated_at DESC')
+            .then(() => !(blacklist & consts.PARTS) && db.fetchConversations()
                 .then(async (results) => {
                     let i = 0;
 
@@ -151,11 +155,11 @@ caporal
 
                         await api.parts(conversation.id)
                             .onBounce(parts => logger.log('info', `Got ${parts.length} parts`))
-                            .onBounce(parts => db.parts(conversation, parts))
+                            .onBounce(parts => db.saveParts(conversation, parts))
                             .jump();
                     }
                 })
-                .then(() => db.query('REFRESH MATERIALIZED VIEW CONCURRENTLY conversation_part_response_time'))
+                .then(() => db.refreshConversationPartResponseTimes())
                 .then(() => logger.log('info', 'Done loading conversation parts')),
             )
             .then(finish)
