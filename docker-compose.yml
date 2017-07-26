@@ -1,5 +1,5 @@
 intercom2dw:
-    image: node:8.1
+    image: node:8.2
     environment:
         POSTGRES_USER: intercom2dw
         POSTGRES_PASSWORD: intercom2dw

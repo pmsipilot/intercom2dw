@@ -1,4 +1,4 @@
-FROM node:8.1 as builder
+FROM node:8.2 as builder
 ENV NODE_ENV=production
 
 RUN npm install -g yarn
@@ -10,7 +10,7 @@ RUN yarn && \
     node_modules/.bin/pkg --output dist/intercom2dw index.js && \
     cp node_modules/libpq/build/Release/addon.node ./dist/
 
-FROM node:8.1
+FROM node:8.2
 
 COPY --from=builder /src/dist /app
 
