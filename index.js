@@ -37,30 +37,44 @@ caporal
 
         if (options.noTags) {
             blacklist |= consts.IGNORE_TAGS;
+
+            logger.log('info', 'Tags will be ignored');
         }
 
         if (options.noSegments) {
             blacklist |= consts.IGNORE_SEGMENTS;
+
+            logger.log('info', 'Segments will be ignored');
         }
 
         if (options.noAdmins) {
             blacklist |= consts.IGNORE_ADMINS;
+
+            logger.log('info', 'Admins will be ignored');
         }
 
         if (options.noCompanies) {
             blacklist |= consts.IGNORE_COMPANIES;
+
+            logger.log('info', 'Companies will be ignored');
         }
 
         if (options.noLeads) {
             blacklist |= consts.IGNORE_LEADS;
+
+            logger.log('info', 'Leads will be ignored');
         }
 
         if (options.noUsers) {
             blacklist |= consts.IGNORE_USERS;
+
+            logger.log('info', 'Users will be ignored');
         }
 
         if (options.noEvents) {
             blacklist |= consts.IGNORE_EVENTS;
+
+            logger.log('info', 'Events will be ignored');
         }
 
         const timer = logger.startTimer();

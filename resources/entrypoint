@@ -1,0 +1,11 @@
+#!/bin/sh
+
+ARGS=
+
+if [ -n "$*" ]
+then
+    ARGS="-x -- ${@}"
+fi
+
+
+pm2 start /app/intercom2dw --cron "${INTERCOM2DW_CRON}" ${ARGS} && pm2 logs intercom2dw

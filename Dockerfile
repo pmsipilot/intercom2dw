@@ -11,9 +11,14 @@ RUN yarn && \
     cp node_modules/libpq/build/Release/addon.node ./dist/
 
 FROM node:8.2
+ENV NODE_ENV=production
+ENV INTERCOM2DW_CRON="0 6 * * *"
 
 COPY --from=builder /src/dist /app
 
-RUN ln -sf /app/intercom2dw /usr/local/bin/intercom2dw
+ADD resources/entrypoint /app/entrypoint
 
-ENTRYPOINT ["intercom2dw"]
+RUN yarn global add pm2 && \
+    chmod +x /app/entrypoint
+
+ENTRYPOINT ["/app/entrypoint"]
