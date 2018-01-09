@@ -221,9 +221,11 @@ CREATE view outdated_user AS
     FROM "event"
     GROUP BY user_id
   )
-  SELECT "user".id, "user".last_request_at
+  SELECT "user".id, "user".user_id, "user".last_request_at, company.company_id
   FROM "user"
   LEFT JOIN user_event ON user_event.user_id = "user".id
+  JOIN user_company ON "user".id=user_company.user_id
+  JOIN company ON company.id=user_company.company_id
   WHERE user_event.created_at IS NULL
   OR "user".last_request_at >= user_event.created_at;
 

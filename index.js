@@ -29,6 +29,7 @@ caporal
     .option('--no-events', 'Do not load events')
     .option('--no-conversations', 'Do not load conversations')
     .option('--no-conversation-parts', 'Do not load conversation parts')
+    .option('--company', 'Load only data for the given company', caporal.REPEATABLE)
     .action((args, options, logger) => {
         const api = new Api(options.intercomApiUrl, args.appId, args.appToken, logger);
         const { dbUser, dbPassword, dbHost, dbPort, dbName } = options;
@@ -118,7 +119,7 @@ caporal
                 .jump()
                 .then(() => logger.log('info', 'Done loading admins')),
             )
-            .then(() => !(blacklist & consts.COMPANIES) && api.companies()
+            .then(() => !(blacklist & consts.COMPANIES) && api.companies(options.company)
                 .onBounce(companies => logger.log('info', `Got ${companies.length} companies`))
                 .onBounce(companies => db.saveCompanies(companies))
                 .jump()
@@ -131,14 +132,14 @@ caporal
                 .then(() => db.refreshLeadTags())
                 .then(() => logger.log('info', 'Done loading leads')),
             )
-            .then(() => !(blacklist & consts.USERS) && api.users()
+            .then(() => !(blacklist & consts.USERS) && api.users(options.company)
                 .onBounce(users => logger.log('info', `Got ${users.length} users`))
                 .onBounce(users => db.saveUsers(users))
                 .jump()
                 .then(() => db.refreshUserTags())
                 .then(() => logger.log('info', 'Done loading users')),
             )
-            .then(() => !(blacklist & consts.EVENTS) && db.fetchOutdatedUsers()
+            .then(() => !(blacklist & consts.EVENTS) && db.fetchOutdatedUsers(options.company)
                 .then(async (results) => {
                     let i = 0;
 
@@ -153,14 +154,18 @@ caporal
                 })
                 .then(() => logger.log('info', 'Done loading user events')),
             )
-            .then(() => !(blacklist & consts.CONVERSATIONS) && api.conversations()
-                .onBounce(conversations => logger.log('info', `Got ${conversations.length} conversations`))
-                .onBounce(conversations => db.saveConversations(conversations))
-                .jump()
-                .then(() => db.refreshConversationResponseTimes())
-                .then(() => logger.log('info', 'Done loading conversations')),
+            .then(() => !(blacklist & consts.CONVERSATIONS) && db.fetchCompaniesUsers(options.company)
+                .then(users => users.rows.map(user => user.user_id))
+                .then(users => api.conversations(users))
+                .then(conversations => conversations
+                    .onBounce(conversations => logger.log('info', `Got ${conversations.length} conversations`))
+                    .onBounce(conversations => db.saveConversations(conversations))
+                    .jump()
+                    .then(() => db.refreshConversationResponseTimes())
+                    .then(() => logger.log('info', 'Done loading conversations'))
+                ),
             )
-            .then(() => !(blacklist & consts.PARTS) && db.fetchConversations()
+            .then(() => !(blacklist & consts.PARTS) && db.fetchCompaniesConversations(options.company)
                 .then(async (results) => {
                     let i = 0;
 
