@@ -158,11 +158,11 @@ caporal
                 .then(users => users.rows.map(user => user.user_id))
                 .then(users => api.conversations(users))
                 .then(conversations => conversations
-                    .onBounce(conversations => logger.log('info', `Got ${conversations.length} conversations`))
-                    .onBounce(conversations => db.saveConversations(conversations))
+                    .onBounce(list => logger.log('info', `Got ${list.length} conversations`))
+                    .onBounce(list => db.saveConversations(list))
                     .jump()
                     .then(() => db.refreshConversationResponseTimes())
-                    .then(() => logger.log('info', 'Done loading conversations'))
+                    .then(() => logger.log('info', 'Done loading conversations')),
                 ),
             )
             .then(() => !(blacklist & consts.PARTS) && db.fetchCompaniesConversations(options.company)
