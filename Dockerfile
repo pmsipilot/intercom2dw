@@ -15,6 +15,9 @@ ENV NODE_ENV=production
 ENV INTERCOM2DW_CRON="0 6 * * *"
 
 COPY --from=builder /src/dist /app
+COPY ./schemas/init.sql /docker-entrypoint-initdb.d/init.sql
+
+VOLUME /docker-entrypoint-initdb.d
 
 ADD resources/entrypoint /app/entrypoint
 
