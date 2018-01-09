@@ -1,0 +1,43 @@
+language: node_js
+
+sudo: required
+
+services:
+    - docker
+
+node_js:
+    - "4"
+    - "5"
+    - "6"
+    - "7"
+    - "8"
+    - "9"
+
+env:
+    global:
+        # DOCKER_USER
+        - secure: "mO/vtPDAydBZtCpE26lCB7XFM154PdBvicyYHjtiUUv85jj5g91O4JAJkUr1I2/m6McbEO7lSEZqNvU2orEBclPTqdfSWCyJz9MFyKZ1GGIVJ409UgvhsJuZWfKemYfzovz36YMw5CH4OVWDyWq7PS+8D6avhemljGIou9KGhRJmwaaim47WJrjFKbg154yhDGxomAM+9RaKWnbRZFfTKahKdEai2fkyi68EQhDUcvZN7TxEYM7R6RxQDsxMXy0l09O/s0gLetorreQRWcNLFgCPCOzczjhURzBSJHLRpFbFpI1+n/3utAB5RkAcouNytNlratCXYvQjRq/CRR0JcSXe1Zr7jYgwQXn21i8J0cGOrcBoaoCBhJqvm1Ri6qBZByR4Q+XLGBBGMEBhg5Oco/UbBPfnVFQEReef8xmQPH0zaCQjIUyOGy/XdSP6HCFFiElsmzDLF0iiXod/rC/CtHIX9I+afsHvbLY0Kjayg7IJbs4pLlrFMntapqLHGwhvX1HHrwYyK6opfXswO/gtcm3/ABEt7Is7D5xqsCwba5fWh/E10oS3zQbaalHYiNttYb6PqPUxfuBXMm1OlKzNbOlgc3vOaIlgApTx65K2CsoyfuVcUtM2ekqbwoF6Jw9vXEnxGKwATYSaOghrfESgYbbufSQhdgFzNvlHQ9AU1Ac="
+        # DOCKER_PASS
+        - secure: "N94TBHMnN76FOXdaiyK/FwiaQ9U1A2TrMZ81BTdsn9VcbvZZKy0RMmgFm789OKCSTSOnS/h0KoVN4JbUhgaSxId9Llm/FQPmhIVOWw4BgJPGtxVoQ86tnO5U0U77RtNlq49soFw25ZCu0lH4pKqG9U6XQ+fnzIlDZp/kdpBOyp1H1xldlH3WrB5rjqlIilTNBRpn9et03qnY7Dfbs0Q9MrIJ4TeLWvLqaGApppcfMS9udM/EFyXdkfPhbgWEcEGGomfX2jT5UHjC/4XDS+WfdjrGjsWu6YBYh1qJRmOHA8ONlutDChU0ns7irWrldMngJjcAZqH8BiRAN3Ju9jb1HPxSY56j7f5XqomXb36JY4uISo+yXgsfWy0pzLlzj60pgNs4fOj5lAo2yWRqxO7HtmlBH2BR3amisPCZxnd97kA0yCVvWDcJTVtXL8MzDnhGd1u9uM/mVWVdp0Rah6oI1o4B6GozPzMjYBFYB6+WJX7MEH97tvpTV1LKa5mCNyZaf0m+nmEp8/PsrsqWOxrz9gjY3jWd3fFO32PZZgRQVi9QzO2S2oEfKQRDYiXTm3Wx/+ctPqq58wVh4WjeVJ5fBon7zTBHLXWbD7TuY6RlHJz8kY0aZHE828dcuAoP6WOFm9eC5DJU6yA2gu8a1yFwCbJDZ+FWJAF1csgGs6nSJTo="
+        - COMMIT=${TRAVIS_COMMIT::8}
+
+cache:
+    directories:
+        - node_modules
+
+script:
+    - yarn
+    - yarn run cs
+    - if [[ -z "$TRAVIS_TAG" && "$TRAVIS_BRANCH" == "master" ]]; then yarn run changelog-lint; fi
+
+deploy:
+    - provider: script
+      script: ci/deploy.sh
+      on:
+          node: 9
+          all_branches: master
+    - provider: script
+      script: ci/deploy.sh
+      on:
+          node: 9
+          tags: true
