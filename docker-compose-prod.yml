@@ -2,7 +2,7 @@ version: '2'
 
 services:
     intercom2dw:
-        image: jubianchi/intercom2dw
+        image: pmsipilot/intercom2dw
         environment:
             POSTGRES_USER: intercom2dw
             POSTGRES_PASSWORD: intercom2dw
@@ -16,7 +16,7 @@ services:
         volumes_from:
             - intercom2dw
         ports:
-            - 2345:5432
+            - 5432:5432
         environment:
             POSTGRES_USER: intercom2dw
             POSTGRES_PASSWORD: intercom2dw

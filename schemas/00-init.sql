@@ -1,5 +1,3 @@
-CREATE DATABASE metabase;
-
 CREATE TABLE IF NOT EXISTS tag (
   id INTEGER NOT NULL,
   name TEXT NOT NULL,
@@ -35,7 +33,7 @@ CREATE TABLE IF NOT EXISTS company (
   CONSTRAINT pk_company PRIMARY KEY (id)
 );
 
-CREATE TABLE company_custom_attribute (
+CREATE TABLE IF NOT EXISTS company_custom_attribute (
   company_id TEXT NOT NULL,
   name TEXT NOT NULL,
   VALUE TEXT NULL,
@@ -43,7 +41,7 @@ CREATE TABLE company_custom_attribute (
   CONSTRAINT fk_company_custom_attribute_company_id FOREIGN KEY(company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
-CREATE TABLE "user" (
+CREATE TABLE IF NOT EXISTS "user" (
   id TEXT NOT NULL,
   user_id TEXT,
   email TEXT,
@@ -74,7 +72,7 @@ CREATE TABLE "user" (
   CONSTRAINT pk_user PRIMARY KEY (id)
 );
 
-CREATE TABLE user_custom_attribute (
+CREATE TABLE IF NOT EXISTS user_custom_attribute (
   user_id TEXT NOT NULL,
   name TEXT NOT NULL,
   VALUE TEXT NULL,
@@ -82,7 +80,7 @@ CREATE TABLE user_custom_attribute (
   CONSTRAINT fk_user_custom_attribute_user_id FOREIGN KEY(user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
-CREATE TABLE user_tag_assoc (
+CREATE TABLE IF NOT EXISTS user_tag_assoc (
   user_id TEXT NOT NULL,
   tag_id INTEGER NOT NULL,
   CONSTRAINT pk_user_tag_assoc PRIMARY KEY (user_id, tag_id),
@@ -98,7 +96,7 @@ CREATE MATERIALIZED VIEW user_tag(user_id, name) AS
 
 CREATE UNIQUE INDEX pk_user_tag ON user_tag(user_id, name);
 
-CREATE TABLE user_company (
+CREATE TABLE IF NOT EXISTS user_company (
   user_id TEXT NOT NULL,
   company_id TEXT NOT NULL,
   CONSTRAINT pk_user_company PRIMARY KEY (user_id, company_id),
@@ -106,7 +104,7 @@ CREATE TABLE user_company (
   CONSTRAINT fk_user_company_company_id FOREIGN KEY(company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
-CREATE TABLE user_segment (
+CREATE TABLE IF NOT EXISTS user_segment (
   user_id TEXT NOT NULL,
   segment_id TEXT NOT NULL,
   CONSTRAINT pk_user_segment PRIMARY KEY (user_id, segment_id),
@@ -114,7 +112,7 @@ CREATE TABLE user_segment (
   CONSTRAINT fk_user_segment_segment_id FOREIGN KEY(segment_id) REFERENCES segment(id) ON DELETE CASCADE
 );
 
-CREATE TABLE lead (
+CREATE TABLE IF NOT EXISTS lead (
   id TEXT NOT NULL,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
@@ -140,15 +138,15 @@ CREATE TABLE lead (
   CONSTRAINT pk_lead PRIMARY KEY (id)
 );
 
-CREATE TABLE lead_custom_attribute (
+CREATE TABLE IF NOT EXISTS lead_custom_attribute (
   lead_id TEXT NOT NULL,
   name TEXT NOT NULL,
-  VALUE TEXT NULL,
+  value TEXT NULL,
   CONSTRAINT pk_lead_custom_attribute PRIMARY KEY (lead_id, name),
   CONSTRAINT fk_lead_custom_attribute_lead_id FOREIGN KEY(lead_id) REFERENCES lead(id) ON DELETE CASCADE
 );
 
-CREATE TABLE lead_tag_assoc (
+CREATE TABLE IF NOT EXISTS lead_tag_assoc (
   lead_id TEXT NOT NULL,
   tag_id INTEGER NOT NULL,
   CONSTRAINT pk_lead_tag_assoc PRIMARY KEY (lead_id, tag_id),
@@ -164,7 +162,7 @@ CREATE MATERIALIZED VIEW lead_tag(lead_id, name) AS
 
 CREATE UNIQUE INDEX pk_lead_tag ON lead_tag(lead_id, name);
 
-CREATE TABLE lead_company (
+CREATE TABLE IF NOT EXISTS lead_company (
   lead_id TEXT NOT NULL,
   company_id TEXT NOT NULL,
   CONSTRAINT pk_lead_company PRIMARY KEY (lead_id, company_id),
@@ -172,7 +170,7 @@ CREATE TABLE lead_company (
   CONSTRAINT fk_lead_company_company_id FOREIGN KEY(company_id) REFERENCES company(id) ON DELETE CASCADE
 );
 
-CREATE TABLE lead_segment (
+CREATE TABLE IF NOT EXISTS lead_segment (
   lead_id TEXT NOT NULL,
   segment_id TEXT NOT NULL,
   CONSTRAINT pk_lead_segment PRIMARY KEY (lead_id, segment_id),
@@ -215,7 +213,7 @@ CREATE TABLE IF NOT EXISTS "event" (
   CONSTRAINT fk_event_user_id FOREIGN KEY(user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
-CREATE view outdated_user AS
+CREATE VIEW outdated_user AS
   WITH user_event(user_id, created_at) AS (
     SELECT user_id, MAX(created_at) AS created_at
     FROM "event"
