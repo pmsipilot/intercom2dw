@@ -7,7 +7,7 @@ COPY . /src
 WORKDIR /src
 
 RUN yarn && \
-    node_modules/.bin/pkg --output dist/intercom2dw index.js && \
+    node_modules/.bin/pkg --output dist/intercom2dw . && \
     cp node_modules/libpq/build/Release/addon.node ./dist/
 
 FROM node:8.2
@@ -15,9 +15,7 @@ ENV NODE_ENV=production
 ENV INTERCOM2DW_CRON="0 6 * * *"
 
 COPY --from=builder /src/dist /app
-COPY ./schemas/init.sql /docker-entrypoint-initdb.d/init.sql
-
-VOLUME /docker-entrypoint-initdb.d
+COPY ./schemas /app/schemas
 
 ADD resources/entrypoint /app/entrypoint
 

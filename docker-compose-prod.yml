@@ -3,18 +3,16 @@ version: '2'
 services:
     intercom2dw:
         image: pmsipilot/intercom2dw
+        links:
+            - db:db
         environment:
             POSTGRES_USER: intercom2dw
             POSTGRES_PASSWORD: intercom2dw
             POSTGRES_DB: intercom2dw
         restart: always
-        networks:
-            - intercom2dw
 
     db:
         image: postgres:9.6
-        volumes_from:
-            - intercom2dw
         ports:
             - 5432:5432
         environment:
@@ -22,9 +20,3 @@ services:
             POSTGRES_PASSWORD: intercom2dw
             POSTGRES_DB: intercom2dw
         restart: always
-        networks:
-            - intercom2dw
-
-networks:
-  intercom2dw:
-      driver: bridge

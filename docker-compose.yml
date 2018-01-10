@@ -1,36 +1,38 @@
-intercom2dw:
-    image: node:8.2
-    environment:
-        POSTGRES_USER: intercom2dw
-        POSTGRES_PASSWORD: intercom2dw
-        POSTGRES_DB: intercom2dw
-    links:
-        - db:db
-    volumes:
-        - .:/src
+version: '2'
 
-db:
-    image: postgres:9.6
-    volumes:
-        - ./schemas/init.sql:/docker-entrypoint-initdb.d/init.sql
-        - ./data/db:/var/lib/postgresql/data
-    ports:
-        - 5432:5432
-    environment:
-        POSTGRES_USER: intercom2dw
-        POSTGRES_PASSWORD: intercom2dw
-        POSTGRES_DB: intercom2dw
+services:
+    intercom2dw:
+        image: node:8.2
+        environment:
+            POSTGRES_USER: intercom2dw
+            POSTGRES_PASSWORD: intercom2dw
+            POSTGRES_DB: intercom2dw
+        links:
+            - db:db
+        volumes:
+            - .:/src
 
-metabase:
-    image: metabase/metabase
-    links:
-        - db:db
-    ports:
-        - 3000:3000
-    environment:
-        MB_DB_TYPE: postgres
-        MB_DB_DBNAME: metabase
-        MB_DB_PORT: 5432
-        MB_DB_USER: intercom2dw
-        MB_DB_PASS: intercom2dw
-        MB_DB_HOST: db
+    db:
+        image: postgres:9.6
+        volumes:
+            - ./data/db:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: intercom2dw
+            POSTGRES_PASSWORD: intercom2dw
+            POSTGRES_DB: intercom2dw
+
+    metabase:
+        image: metabase/metabase
+        links:
+            - db:db
+        ports:
+            - 3000:3000
+        environment:
+            MB_DB_TYPE: postgres
+            MB_DB_DBNAME: metabase
+            MB_DB_PORT: 5432
+            MB_DB_USER: intercom2dw
+            MB_DB_PASS: intercom2dw
+            MB_DB_HOST: db

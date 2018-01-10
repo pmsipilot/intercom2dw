@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS user_tag_assoc (
   CONSTRAINT fk_user_tag_assoc_tag_id FOREIGN KEY(tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );
 
+DROP MATERIALIZED VIEW IF EXISTS user_tag;
 CREATE MATERIALIZED VIEW user_tag(user_id, name) AS
   SELECT "user".id, tag.name
   FROM "user"
@@ -154,6 +155,7 @@ CREATE TABLE IF NOT EXISTS lead_tag_assoc (
   CONSTRAINT fk_lead_tag_assoc_tag_id FOREIGN KEY(tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );
 
+DROP MATERIALIZED VIEW IF EXISTS lead_tag;
 CREATE MATERIALIZED VIEW lead_tag(lead_id, name) AS
   SELECT lead.id, tag.name
   FROM lead
@@ -213,6 +215,7 @@ CREATE TABLE IF NOT EXISTS "event" (
   CONSTRAINT fk_event_user_id FOREIGN KEY(user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
+DROP VIEW IF EXISTS outdated_user;
 CREATE VIEW outdated_user AS
   WITH user_event(user_id, created_at) AS (
     SELECT user_id, MAX(created_at) AS created_at
@@ -245,6 +248,7 @@ CREATE TABLE IF NOT EXISTS conversation_part (
   CONSTRAINT fk_conversation_part_author_user_id FOREIGN KEY(author_user) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
+DROP MATERIALIZED VIEW IF EXISTS conversation_response_time;
 CREATE MATERIALIZED VIEW conversation_response_time(conversation_id, time) AS
   WITH conversation_part_date AS (
       SELECT
@@ -264,6 +268,7 @@ CREATE MATERIALIZED VIEW conversation_response_time(conversation_id, time) AS
 
 CREATE UNIQUE INDEX pk_conversation_response_time ON conversation_response_time(conversation_id);
 
+DROP MATERIALIZED VIEW IF EXISTS conversation_part_response_time;
 CREATE MATERIALIZED VIEW conversation_part_response_time(conversation_part_id, time) AS
   WITH conversation_part_time AS (
       SELECT
@@ -304,6 +309,7 @@ FROM (
 $$
 LANGUAGE 'sql' IMMUTABLE;
 
+DROP AGGREGATE IF EXISTS median(NUMERIC);
 CREATE AGGREGATE median(NUMERIC) (
   SFUNC=array_append,
   STYPE=NUMERIC[],

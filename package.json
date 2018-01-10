@@ -1,14 +1,16 @@
 {
   "name": "intercom2dw",
   "version": "1.0.0",
+  "bin": "index.js",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "caporal": "^0.6.0",
     "node-fetch": "^1.7.1",
-    "pg": "^6.3.1",
-    "pg-native": "^1.10.1",
+    "pg": "^7.4.1",
+    "pg-native": "^2.2.0",
     "pkg": "^4.1.0",
+    "postgrator": "^3.1.0",
     "striptags": "^3.0.1",
     "winston": "^2.3.1"
   },
@@ -23,5 +25,8 @@
     "cs": "eslint lib/ index.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 1",
     "changelog-lint": "conventional-changelog-lint -p angular --from master --to HEAD"
+  },
+  "pkg": {
+    "assets": "schemas/**/*"
   }
 }

@@ -1,4 +1,6 @@
 const caporal = require('caporal');
+const path = require('path');
+const Postgrator = require('postgrator');
 const metadata = require('./package.json');
 const Api = require('./lib/api');
 const Db = require('./lib/db');
@@ -30,10 +32,33 @@ caporal
     .option('--no-conversations', 'Do not load conversations')
     .option('--no-conversation-parts', 'Do not load conversation parts')
     .option('--company', 'Load only data for the given company', caporal.REPEATABLE)
-    .action((args, options, logger) => {
-        const api = new Api(options.intercomApiUrl, args.appId, args.appToken, logger);
+    .action(async (args, options, logger) => {
         const { dbUser, dbPassword, dbHost, dbPort, dbName } = options;
-        const db = new Db(`postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`, logger);
+        const dbDsn = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
+        const postgrator = new Postgrator({
+            migrationDirectory: path.join(__dirname, 'schemas'),
+            driver: 'pg',
+            connectionString: dbDsn,
+            schemaTable: 'schema_version',
+        });
+
+        postgrator.on('validation-started', (migration) => {
+            logger.log('info', `Validating migration ${migration.filename}`, migration);
+        });
+        postgrator.on('migration-finished', (migration) => {
+            logger.log('info', `Applied migration ${migration.filename}`, migration);
+        });
+
+        try {
+            await postgrator.migrate();
+        } catch (err) {
+            logger.log('error', err.message);
+
+            process.exit(1);
+        }
+
+        const api = new Api(options.intercomApiUrl, args.appId, args.appToken, logger);
+        const db = new Db(dbDsn, logger);
         let blacklist = 0;
 
         if (options.noTags) {
@@ -83,8 +108,8 @@ caporal
             timer.done('Time');
             logger.log('info', 'Requests', { requests: api.requests });
         };
-        const finish = () => {
-            db.disconnect();
+        const finish = async () => {
+            await db.disconnect();
 
             profile();
         };
@@ -185,7 +210,7 @@ caporal
             .catch((err) => {
                 logger.log('error', err);
 
-                finish();
+                return finish();
             });
     });
 
