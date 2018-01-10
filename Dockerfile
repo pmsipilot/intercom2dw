@@ -12,14 +12,16 @@ RUN yarn && \
 
 FROM node:8.2
 ENV NODE_ENV=production
-ENV INTERCOM2DW_CRON="0 6 * * *"
+ENV INTERCOM2DW_CRON="0 */12 * * *"
+
+RUN apt-get update -y && \
+    apt-get install -y cron
 
 COPY --from=builder /src/dist /app
 COPY ./schemas /app/schemas
 
 ADD resources/entrypoint /app/entrypoint
 
-RUN yarn global add pm2 && \
-    chmod +x /app/entrypoint
+RUN chmod +x /app/entrypoint
 
 ENTRYPOINT ["/app/entrypoint"]

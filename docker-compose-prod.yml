@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
     intercom2dw:
@@ -9,7 +9,11 @@ services:
             POSTGRES_USER: intercom2dw
             POSTGRES_PASSWORD: intercom2dw
             POSTGRES_DB: intercom2dw
-        restart: always
+            INTERCOM2DW_CRON: 0 */12 * * *
+        restart: unless-stopped
+        depends_on:
+            db:
+                condition: service_healthy
 
     db:
         image: postgres:9.6
@@ -19,4 +23,9 @@ services:
             POSTGRES_USER: intercom2dw
             POSTGRES_PASSWORD: intercom2dw
             POSTGRES_DB: intercom2dw
-        restart: always
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d intercom2dw"]
+            interval: 5s
+            timeout: 60s
+            retries: 3

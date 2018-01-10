@@ -1,11 +1,7 @@
 #!/bin/sh
 
-ARGS=
+printenv | sed 's/^\([a-zA-Z0-9_]*\)=\(.*\)$/export \1="\2"/g' > /app/.env
+echo "${INTERCOM2DW_CRON} . /app/.env; /app/intercom2dw ${@} >> /proc/$$/fd/1 2>&1" > /app/.cron
+crontab /app/.cron
 
-if [ -n "$*" ]
-then
-    ARGS="-x -- ${@}"
-fi
-
-
-pm2 start /app/intercom2dw --cron "${INTERCOM2DW_CRON}" ${ARGS} && pm2 logs intercom2dw
+cron -f
