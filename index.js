@@ -18,7 +18,7 @@ caporal
     .argument('[app-token]', 'Application token', null, process.env.INTERCOM2DW_APP_TOKEN)
     .option('--intercom-api-url', 'Intercom API URL', null, process.env.INTERCOM2DW_API_URL || consts.API_URL)
     .option('--db-host', 'Postgres database host', null, process.env.INTERCOM2DW_DB_HOST || consts.DB_HOST)
-    .option('--db-port', 'Postgres database port', caporal.INT, process.env.INTERCOM2DW_DB_HOST || consts.DB_PORT)
+    .option('--db-port', 'Postgres database port', caporal.INT, process.env.INTERCOM2DW_DB_PORT || consts.DB_PORT)
     .option('--db-user', 'Postgres database username', null, process.env.INTERCOM2DW_DB_USER || consts.DB_USER)
     .option('--db-password', 'Postgres database password', null, process.env.INTERCOM2DW_DB_PASSWORD || consts.DB_PASS)
     .option('--db-name', 'Postgres database name', null, process.env.INTERCOM2DW_DB_NAME || consts.DB_NAME)
