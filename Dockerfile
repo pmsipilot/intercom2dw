@@ -1,24 +1,28 @@
-FROM node:8.2 as builder
-ENV NODE_ENV=production
+FROM node:8.6-alpine as builder
 
-RUN npm install -g yarn
+RUN apk update && \
+    apk add python make g++ postgresql-dev yarn
 
-COPY . /src
+COPY package.json yarn.lock /src/
+
 WORKDIR /src
+RUN yarn
 
-RUN yarn && \
-    node_modules/.bin/pkg --output dist/intercom2dw . && \
+ADD index.js /src
+ADD lib/ /src/lib
+ADD schemas/ /src/schemas
+
+RUN node_modules/.bin/pkg --output dist/intercom2dw . && \
     cp node_modules/libpq/build/Release/addon.node ./dist/
 
-FROM node:8.2
+FROM node:8.6-alpine
 ENV NODE_ENV=production
 ENV INTERCOM2DW_CRON="0 */12 * * *"
 
-RUN apt-get update -y && \
-    apt-get install -y cron
+RUN apk update && \
+    apk add postgresql-dev
 
 COPY --from=builder /src/dist /app
-COPY ./schemas /app/schemas
 
 ADD resources/entrypoint /app/entrypoint
 

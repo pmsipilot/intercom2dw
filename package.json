@@ -13,7 +13,6 @@
     "node-fetch": "^1.7.1",
     "pg": "^7.4.1",
     "pg-native": "^2.2.0",
-    "pkg": "^4.1.0",
     "postgrator": "^3.1.0",
     "striptags": "^3.0.1",
     "winston": "^2.3.1"
@@ -23,7 +22,8 @@
     "conventional-changelog-lint": "^1.1.9",
     "eslint": "^4.0.0",
     "eslint-config-airbnb-base": "^11.2.0",
-    "eslint-plugin-import": "^2.3.0"
+    "eslint-plugin-import": "^2.3.0",
+    "pkg": "^4.2.0"
   },
   "scripts": {
     "cs": "eslint lib/ index.js",
