@@ -26,7 +26,7 @@ services:
             POSTGRES_PASSWORD: intercom2dw
             POSTGRES_DB: intercom2dw
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres -d intercom2dw"]
+            test: ["CMD-SHELL", "pg_isready -U intercom2dw -d intercom2dw"]
             interval: 5s
             timeout: 60s
             retries: 3

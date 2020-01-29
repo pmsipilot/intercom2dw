@@ -195,11 +195,13 @@ caporal
                     let i = 0;
 
                     for (const conversation of results.rows) {
-                        logger.log('info', `Loading parts for conversation ${i += 1} of ${results.rows.length}`);
-
-                        await api.parts(conversation.id)
-                            .onBounce(parts => logger.log('info', `Got ${parts.length} parts`))
-                            .onBounce(parts => db.saveParts(conversation, parts))
+                        logger.log('info', `Loading details for conversation ${i += 1} of ${results.rows.length}`);
+                        await api.conversationDetails(conversation.id)
+                            .onBounce(detail => detail.conversation_rating && detail.conversation_rating.rating
+                                && db.saveConversationsRatings(conversation, detail.conversation_rating))
+                            .onBounce(detail => detail.conversation_parts
+                                && detail.conversation_parts.conversation_parts &&
+                                db.saveParts(conversation, detail.conversation_parts.conversation_parts))
                             .jump();
                     }
                 })
