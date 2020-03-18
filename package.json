@@ -12,8 +12,8 @@
     "caporal": "^0.6.0",
     "dnscache": "^1.0.1",
     "node-fetch": "^1.7.1",
-    "pg": "^7.4.1",
-    "pg-native": "^2.2.0",
+    "pg": "^7.18.2",
+    "pg-native": "^3.0.0",
     "postgrator": "^3.1.0",
     "striptags": "^3.0.1",
     "winston": "^2.3.1"
