@@ -196,7 +196,7 @@ caporal
 
                     for (const conversation of results.rows) {
                         logger.log('info', `Loading details for conversation ${i += 1} of ${results.rows.length}`);
-                        await api.conversationDetails(conversation.id)
+                        await api.conversationDetails(conversation.id, logger)
                             .onBounce(detail => detail.conversation_rating && detail.conversation_rating.rating
                                 && db.saveConversationsRatings(conversation, detail.conversation_rating))
                             .onBounce(detail => detail.conversation_parts
