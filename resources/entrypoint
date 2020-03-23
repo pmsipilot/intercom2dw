@@ -4,4 +4,9 @@ mkdir -p /app/crontabs
 
 echo "${INTERCOM2DW_CRON} /app/intercom2dw ${@}" >> /etc/crontabs/root
 
+if [ -n "${INTERCOM2DW_EVENTS_CRON}" ]
+then
+    echo "${INTERCOM2DW_EVENTS_CRON} /app/intercom2dw --only-events ${@}" >> /etc/crontabs/root
+fi
+
 crond -f -d 8 -c /etc/crontabs/

@@ -35,17 +35,18 @@ Copy this file, tweak it and start the service to see your data going from the A
 
 You'll be able to tweak Intercom2DW using several environment variables. Here they are:
 
-| Variable                  | Default                    | Description                                                                |
-|---------------------------|----------------------------|----------------------------------------------------------------------------|
-| `INTERCOM2DW_APP_ID`      |                            | Your Intercom application ID only if you are using api key authentication. |
-| `INTERCOM2DW_APP_TOKEN`   |                            | Your Intercom api key or your access token.                                |
-| `INTERCOM2DW_API_URL`     | `https://api.intercom.io`  | The URL to use to reach the Intercom API.                                  |
-| `INTERCOM2DW_DB_HOST`     | `db`                       | The host name to use to connect to the PostgreSQL database.                |
-| `INTERCOM2DW_DB_PORT`     | `5432`                     | The TCP port to use to connect to the PostgreSQL database.                 |
-| `INTERCOM2DW_DB_USER`     | `intercom2dw`              | The username to use to connect to the PostgreSQL database.                 |
-| `INTERCOM2DW_DB_PASSWORD` | `intercom2dw`              | The password to use to connect to the PostgreSQL database.                 |
-| `INTERCOM2DW_DB_NAME`     | `intercom2dw`              | The database name to use to connect to the PostgreSQL database.            |
-| `INTERCOM2DW_CRON`        | `0 */12 * * *`             | The cron expression to use to schedule process executions.                 |
+| Variable                  | Default                    | Description                                                                       |
+|---------------------------|----------------------------|-----------------------------------------------------------------------------------|
+| `INTERCOM2DW_APP_ID`      |                            | Your Intercom application ID only if you are using api key authentication.        |
+| `INTERCOM2DW_APP_TOKEN`   |                            | Your Intercom api key or your access token.                                       |
+| `INTERCOM2DW_API_URL`     | `https://api.intercom.io`  | The URL to use to reach the Intercom API.                                         |
+| `INTERCOM2DW_DB_HOST`     | `db`                       | The host name to use to connect to the PostgreSQL database.                       |
+| `INTERCOM2DW_DB_PORT`     | `5432`                     | The TCP port to use to connect to the PostgreSQL database.                        |
+| `INTERCOM2DW_DB_USER`     | `intercom2dw`              | The username to use to connect to the PostgreSQL database.                        |
+| `INTERCOM2DW_DB_PASSWORD` | `intercom2dw`              | The password to use to connect to the PostgreSQL database.                        |
+| `INTERCOM2DW_DB_NAME`     | `intercom2dw`              | The database name to use to connect to the PostgreSQL database.                   |
+| `INTERCOM2DW_CRON`        | `0 */12 * * *`             | The cron expression used to schedule the full loading process (including events). |
+| `INTERCOM2DW_EVENTS_CRON` |                            | The cron expression used to schedule the loading of events only.                  |
 
 ## Caveats
 

@@ -18,6 +18,7 @@ RUN node_modules/.bin/pkg --output dist/intercom2dw . && \
 FROM node:8.6-alpine
 ENV NODE_ENV=production
 ENV INTERCOM2DW_CRON="0 */12 * * *"
+ENV INTERCOM2DW_EVENTS_CRON=""
 
 RUN apk update && \
     apk add postgresql-dev
