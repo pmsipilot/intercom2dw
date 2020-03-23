@@ -31,6 +31,7 @@ caporal
     .option('--no-events', 'Do not load events')
     .option('--no-conversations', 'Do not load conversations')
     .option('--no-conversation-parts', 'Do not load conversation parts')
+    .option('--only-events', 'Only load events')
     .option('--company', 'Load only data for the given company', caporal.REPEATABLE)
     .action(async (args, options, logger) => {
         const { dbUser, dbPassword, dbHost, dbPort, dbName } = options;
@@ -60,6 +61,12 @@ caporal
         const api = new Api(options.intercomApiUrl, args.appId, args.appToken, logger);
         const db = new Db(dbDsn, logger);
         let blacklist = 0;
+
+        if (options.onlyEvents) {
+            blacklist |= consts.IGNORE_ALL_BUT_EVENTS;
+
+            logger.log('info', 'Only events will be loaded');
+        }
 
         if (options.noTags) {
             blacklist |= consts.IGNORE_TAGS;
@@ -114,11 +121,11 @@ caporal
             profile();
         };
 
-        process.on('SIGINT', () => {
+        process.on('SIGINT', async () => {
             process.stdout.write('\r');
             logger.log('warn', 'Caught SIGINT');
 
-            finish();
+            await finish();
 
             process.exit();
         });
