@@ -18,6 +18,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12
+          cache: yarn
+
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
