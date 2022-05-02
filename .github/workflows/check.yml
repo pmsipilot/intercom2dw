@@ -13,6 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install libpq-dev
+
       - uses: borales/actions-yarn@v2.3.0
         with:
           cmd: install
