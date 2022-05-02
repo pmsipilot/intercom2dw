@@ -11,6 +11,30 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  yarn-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y python3 libpq-dev
+
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install
+
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: run cs
+
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: run changelog-lint
+
   build-and-push-image:
     runs-on: ubuntu-latest
     permissions:
