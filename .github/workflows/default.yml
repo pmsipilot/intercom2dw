@@ -38,10 +38,6 @@ jobs:
         run: |
           yarn run cs
 
-      - name: Changelog check
-        run: |
-          yarn run changelog-lint
-
   build-and-push-image:
     runs-on: ubuntu-latest
     needs: [yarn-checks]
