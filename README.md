@@ -14,13 +14,15 @@ The repository contains a `docker-compose` configuration file that will let you 
 database, a Metabase instance and the Intercom2DW container. Here is how:
 
 ```sh
-docker-compose up -d
-docker-compose run intercom2dw bash
+docker compose up -d
+docker compose run intercom2dw bash
 ```
 
 You will now have a prompt from the Intercom2DW container. From here you can start loading your data:
 
 ```sh
+cd /src
+npm i
 node /src/index.js --help
 ```
 

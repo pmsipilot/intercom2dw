@@ -1,5 +1,3 @@
-version: '2.1'
-
 services:
     intercom2dw:
         image: node:8.2
@@ -20,7 +18,7 @@ services:
         volumes:
             - ./data/db:/var/lib/postgresql/data
         ports:
-            - 5432:5432
+            - "5432:5432"
         environment:
             POSTGRES_USER: intercom2dw
             POSTGRES_PASSWORD: intercom2dw
@@ -30,3 +28,4 @@ services:
             interval: 5s
             timeout: 60s
             retries: 3
+
